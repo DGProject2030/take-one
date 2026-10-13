@@ -12,9 +12,11 @@
 set -u
 fps=${1:?fps}; dur=${2:?duration in seconds}; out=${3:?output mp4}; workers=${4:-3}; piece=${5:-12}
 work="$(dirname "$out")/.pieces-$(basename "$out" .mp4)"; rm -rf "$work"; mkdir -p "$work"
-starts=(); t=0; while [ "$(echo "$t < $dur" | bc)" = 1 ]; do starts+=("$t"); t=$((t + piece)); done
+# sums with fractions are done in awk, which every system with bash has (bc is missing on Windows and on a bare Linux)
+lt() { LC_ALL=C awk -v a="$1" -v b="$2" 'BEGIN { exit !(a + 0 < b + 0) }'; }
+starts=(); t=0; while lt "$t" "$dur"; do starts+=("$t"); t=$((t + piece)); done
 n=${#starts[@]}
-run_piece() { local i=$1 s=${starts[$1]} e; e=$(echo "if (${starts[$1]} + $piece < $dur) ${starts[$1]} + $piece else $dur" | bc)
+run_piece() { local i=$1 s=${starts[$1]} e; e=$(LC_ALL=C awk -v s="${starts[$1]}" -v p="$piece" -v d="$dur" 'BEGIN { e = s + p; if (e < d + 0) print e; else print d }')
   START=$s END=$e node export.mjs "$fps" "$work/p$i.mp4" > "$work/p$i.log" 2>&1 & echo $! > "$work/p$i.pid"; }
 next=0; running=()
 while [ $next -lt $n ] || [ ${#running[@]} -gt 0 ]; do
@@ -34,6 +36,6 @@ for i in $(seq 0 $((n - 1))); do
   echo "file 'p$i.mp4'" >> "$work/list.txt"
 done
 ffmpeg -v error -y -f concat -safe 0 -i "$work/list.txt" -c copy "$out" || exit 1
-got=$(ffprobe -v error -count_packets -select_streams v -show_entries stream=nb_read_packets -of csv=p=0 "$out"); want=$(echo "$dur * $fps / 1" | bc)
+got=$(ffprobe -v error -count_packets -select_streams v -show_entries stream=nb_read_packets -of csv=p=0 "$out" | tr -d '\r'); want=$(LC_ALL=C awk -v d="$dur" -v f="$fps" 'BEGIN { printf "%d\n", d * f + 0.000001 }')
 echo "wrote $out: $got frames (expected about $want)"; [ "$got" -ge $((want - 2)) ] || { echo "frame count is short: a piece stopped early, read its log in $work"; exit 1; }
 rm -rf "$work"

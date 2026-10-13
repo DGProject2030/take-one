@@ -60,6 +60,8 @@ for (let i = 2; i < process.argv.length; i++) { const a = process.argv[i]; if (a
 const W = Number(process.env.W || 1920), H = Number(process.env.H || 1080);
 const SAMPLES = Math.max(4, Number(opt.samples ?? 12));
 const TMP = path.join(process.env.GATE_TMP || os.tmpdir(), `gate-${process.pid}`);
+// Metal is the Mac's graphics engine: ask for it on a Mac only, every other system keeps Chrome's own choice
+const GPU = process.platform === 'darwin' ? ['--use-angle=metal', '--ignore-gpu-blocklist'] : ['--ignore-gpu-blocklist'];
 
 let fails = 0, checks = 0;
 const say = (ok, label, detail = '') => { checks++; if (!ok) fails++; console.log(`  ${ok ? 'PASS' : 'FAIL'}  ${label}${detail ? '   ' + detail : ''}`); };
@@ -295,7 +297,7 @@ const run = async () => {
   console.log(`QUALITY GATE   ${filmPath}   viewport ${W}x${H}`);
   const chromium = loadChromium();
   const { srv, url } = await serve(path.dirname(filmPath));
-  const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-angle=metal', '--ignore-gpu-blocklist'] });
+  const browser = await chromium.launch({ channel: 'chrome', headless: true, args: GPU });
   try {
     const { pageHolds, pageCuts, pageFootage } = await determinism(browser, url, path.basename(filmPath));
     contractScan(filmPath);

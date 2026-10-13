@@ -118,7 +118,7 @@ For a brand, a product or a launch, the look comes from the brand (step 1b) and 
 **The gallery shows only our own renders, never frames from other people's videos** (reference videos are kept in a study folder outside the skill). Every card carries the one-story preview pack: THE PAPER BOAT, the same two frames (A: setting out at first light, boat lower-left heading right; B: the storm peak, one big diagonal wave from upper right) rendered by us in that style. Sources live in assets/previews-src/<id>/boat.html with the shared brief at assets/previews-src/BOAT-BRIEF.md and renderer snap.mjs (needs a node_modules symlink beside it with playwright-core, see .gitignore). When adding a style: write the style file, add the card, render the two boat frames from the brief before the card ships; the render doubles as the style file's proof that it works.
 
 ```bash
-open ~/.claude/skills/take-one/assets/gallery.html
+open <skill>/assets/gallery.html      # macOS; on Windows use start, on Linux xdg-open
 ```
 
 | Style | File | Best for |
@@ -211,6 +211,8 @@ Put the MP4 somewhere obvious (Desktop or Downloads), named plainly (`<name>.mp4
 - **the review room, started and opened on this cut** (`references/review-room.md`), with one line on how to give notes both ways: typed in the chat, or pinned on a frame in the room (they click on a frame and leave a note there). This is never skipped or left for the person to ask for: a delivery without the room open is not a delivery. Notes are the next take: read each one with its snapshot, answer it in a new cut, and send that cut back through the reviewer
 
 ## Files
+
+`<skill>` in a command, here and in `references/`, is the folder that holds this file. In Claude Code that is usually `~/.claude/skills/take-one`; another agent keeps it somewhere else.
 
 - `assets/gallery.html` + `assets/previews/` : the style menu
 - `assets/logo/` : the Take One mark (a film slate, arm lifted, a 1) and the logo with its name, as vector files: `take-one-mark.svg`, `take-one-logo.svg` (name beside the mark) and `take-one-logo-stacked.svg` (name under it), each with an `-on-light` twin. The plain files are for dark grounds. The review room and the README use them; use these files wherever the skill's own name appears and never redraw the mark

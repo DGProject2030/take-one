@@ -14,7 +14,9 @@ const W = Number(process.env.W || 1920), H = Number(process.env.H || 1080), SLOW
 const SUB = Math.max(1, Math.round(Number(process.env.SUB || 1)));
 const FILM = process.env.FILM || 'film.html';
 const { srv, url } = await serve('.');
-const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--use-angle=metal', '--ignore-gpu-blocklist'] });
+// Metal is the Mac's graphics engine: ask for it on a Mac only, every other system keeps Chrome's own choice
+const GPU = process.platform === 'darwin' ? ['--use-angle=metal', '--ignore-gpu-blocklist'] : ['--ignore-gpu-blocklist'];
+const browser = await chromium.launch({ channel: 'chrome', headless: true, args: GPU });
 const page = await browser.newPage({ viewport: { width: W, height: H } });
 await page.goto(url + '/' + FILM + (H > W ? '?portrait=1' : ''));
 await page.waitForFunction(() => typeof window.renderFrame === 'function' && window.READY === true, null, { timeout: 120000 });

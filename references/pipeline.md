@@ -2,10 +2,12 @@
 
 The watercolor style uses the Claude Animation Base's own `render.mjs`. The other styles use this skill's scripts.
 
+In the commands below `<skill>` is the folder that holds `SKILL.md` (in Claude Code usually `~/.claude/skills/take-one`).
+
 ## New project
 
 ```bash
-bash ~/.claude/skills/take-one/scripts/new-canvas-project.sh ~/my-video
+bash <skill>/scripts/new-canvas-project.sh ~/my-video
 ```
 Creates the folder, copies `serve.mjs`, `frames.mjs`, `export.mjs` and `springs.js`, installs `playwright-core` (uses the installed Google Chrome, no browser download), and writes a starter `film.html` with the contract below, already loading the springs.
 
@@ -34,24 +36,24 @@ Read the PNGs and `sheet.png` with the Read tool. Console errors are printed (a 
 ## Quality gate (before showing anything rendered)
 
 ```bash
-node ~/.claude/skills/take-one/scripts/gate.mjs film.html                    # 1 determinism + 2 contract scan
-node ~/.claude/skills/take-one/scripts/gate.mjs film.html --mp4 out.mp4 --holds "12-14" --cuts "4.5,9"   # + 3 dead air, 4 pops
-node ~/.claude/skills/take-one/scripts/gate.mjs --self-test                  # prove the gate itself still catches bugs
+node <skill>/scripts/gate.mjs film.html                    # 1 determinism + 2 contract scan
+node <skill>/scripts/gate.mjs film.html --mp4 out.mp4 --holds "12-14" --cuts "4.5,9"   # + 3 dead air, 4 pops
+node <skill>/scripts/gate.mjs --self-test                  # prove the gate itself still catches bugs
 ```
 The stillness checks compare frames 1/30 s apart, so a film gets the same answer at 30 and at 60 fps. A clip that plays inside the film at a lower frame rate than the film (a 30 fps video in a 60 fps film) holds each of its frames for two of ours, so every new clip frame reads as a pop: declare it on the page, `window.FOOTAGE = [[from, to, fps]]`, or with `--footage "13-18.5@30"`, and the gate measures that stretch once per clip frame. Cuts inside the clip are still found and still need declaring. Words that land whole on a beat are pops too: give each a three or four frame fade, and declare only the real hits. The burst on a music hit and any deliberate dip to black are declared (`--cuts` for the first, `--holds` for the second) rather than softened. Run it twice per film: checks 1-2 right after the first shots draw (a stale cache or a `Math.random` found now costs minutes, found after a 9-minute export costs the render), and all three on the exported MP4 before the user sees a single frame or contact sheet. It samples ~12 frames cold-forward vs warmed-reverse (md5, PSNR > 45 dB fallback) and on a mismatch names the poisoning frame ("ORDER-DEPENDENT: drawing frame X first changes frame Y" = a cache key missing a term or leaked ctx state). Deliberate stills go in `--holds`. Check 4 (pops) lists every frame whose difference from the last is over 3x its six neighbours': each one is either an intentional hard cut, declared with `--cuts` (or `window.CUTS`), or a bug to fix (an element appearing with no ease, a flood clearing too fast so it reads as a flash). It resolves playwright-core via the `node_modules` symlink beside it in `scripts/` (or `PLAYWRIGHT_NODE_MODULES=/path/to/node_modules`); it only reads the MP4, never writes to the project. Adapted from anidoodle (Apache-2.0).
 
 ## Footage inside a frame (a screen in a player, a strip of an earlier film)
 
 ```bash
-python3 ~/.claude/skills/take-one/scripts/content-box.py capture.mp4 12.0 2.5 --rest --keep 160-900     # where the content sits, and the crop to use
+python3 <skill>/scripts/content-box.py capture.mp4 12.0 2.5 --rest --keep 160-900     # where the content sits, and the crop to use
 ```
 Measure before cropping: the script finds the box of everything that is not ground in that stretch and prints an ffmpeg `crop` and `scale` that keep a clear margin round it for the space the film gives it (`--fit 1344x598`). When the content is wider than the space the strip comes out shorter: centre it, do not cut it. Blank what you leave out (a header row, a caption) with `drawbox` before the crop, and draw a dark strip `lighten` over the player's dark ground so the two grounds are one. Declare the footage's frame rate (`window.FOOTAGE`) for the gate.
 
 ## Text audit (what the words on screen actually do)
 
 ```bash
-node ~/.claude/skills/take-one/scripts/text-audit.mjs                 # film.html in this folder
-node ~/.claude/skills/take-one/scripts/text-audit.mjs cut.html --step 0.05 --ignore "lorem|^\\d+$" --json text.json
+node <skill>/scripts/text-audit.mjs                 # film.html in this folder
+node <skill>/scripts/text-audit.mjs cut.html --step 0.05 --ignore "lorem|^\\d+$" --json text.json
 ```
 Run it at the stills gate and again before the reviewer. It draws the film frame by frame, records every `fillText` and `strokeText` (the text, its size on screen, where it sits, how opaque), joins the samples into "this text was up from A to B", and reports:
 - **SMALL**: held 0.6 s or more and under 3.3 % of the frame height (FAIL) or under 4.3 % (WARN). At 1920x1080 that is 36 and 46 px: about 6.5 and 8.5 px on a phone.
@@ -85,8 +87,8 @@ SUB=8 node export.mjs 60 master.mp4               # final master only; review ex
 One browser draws about 4 to 8 frames a second at 1080p, so a 75 s film at 60 fps takes ten minutes or more in one process. Render it in pieces instead:
 
 ```bash
-bash ~/.claude/skills/take-one/scripts/render-parallel.sh 60 78.6 out/master.mp4          # fps, duration in seconds, output; 3 workers
-bash ~/.claude/skills/take-one/scripts/render-parallel.sh 30 78.6 out/draft.mp4 3 12      # review draft: 30 fps, 3 workers, 12 s pieces
+bash <skill>/scripts/render-parallel.sh 60 78.6 out/master.mp4          # fps, duration in seconds, output; 3 workers
+bash <skill>/scripts/render-parallel.sh 30 78.6 out/draft.mp4 3 12      # review draft: 30 fps, 3 workers, 12 s pieces
 ```
 - Run it from the project folder. It writes the picture only; add the sound with `mux-audio.sh` (or one ffmpeg call).
 - **Three workers on a laptop.** Each worker is a whole Chrome. Six at once ran a 16 GB machine out of memory in the middle of a film; three finished without trouble.
