@@ -14,15 +14,24 @@
 set -u
 V=${1:?cut.mp4}; P=${2:?pack dir}; shift 2; beats=""; strips=""; text=""
 while [ $# -gt 0 ]; do case "$1" in --beats) beats=$2; shift 2;; --strips) strips=$2; shift 2;; --text) text=$2; shift 2;; *) echo "unknown option $1"; exit 2;; esac; done
+# times are plain numbers and ranges of numbers; anything else stops here, before any of it is used
+num='[0-9]+(\.[0-9]+)?'
+ok() { [ -z "$1" ] || printf '%s' "$1" | grep -Eq "^$2(,$2)*$"; }
+ok "$beats" "$num" || { echo "--beats takes times in seconds, like 0,1.5,4.8"; exit 2; }
+ok "$text" "$num" || { echo "--text takes times in seconds, like 4.8,9.6"; exit 2; }
+ok "$strips" "$num-$num" || { echo "--strips takes ranges in seconds, like 9.2-11.6,66.0-67.2"; exit 2; }
+[ -f "$V" ] || { echo "no such film: $V"; exit 2; }
+# the pack folder is emptied only when it is new, empty, or a pack this script made before
+if [ -e "$P" ] && [ -n "$(ls -A "$P" 2>/dev/null)" ] && [ ! -f "$P/WORDS-AND-SOUND.md" ]; then echo "$P holds other files; give a new folder for the pack"; exit 2; fi
 rm -rf "$P"; mkdir -p "$P"; T=$(mktemp -d)
 dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$V"); D=${dur%.*}
 k=0; s=0; while [ $s -lt "$D" ]; do k=$((k + 1)); ffmpeg -v error -y -ss $s -t 39.9 -i "$V" -vf "fps=1,scale=400:-1,tile=8x5:padding=4:color=gray" -frames:v 1 "$P/sheet_1fps_part$k.png"; s=$((s + 40)); done
-if [ -z "$beats" ]; then beats=$(python3 -c "d=$dur; print(','.join(f'{d*i/35.5:.1f}' for i in range(36)))"); fi
+if [ -z "$beats" ]; then beats=$(python3 -c "import sys; d=float(sys.argv[1]); print(','.join(f'{d*i/35.5:.1f}' for i in range(36)))" "$dur"); fi
 IFS=',' read -ra B <<< "$beats"; i=0
 for t in "${B[@]}"; do ffmpeg -v error -y -ss "$t" -i "$V" -frames:v 1 -vf scale=640:-1 "$T/b$(printf %03d $i).png"; [ $((i % 5)) -eq 0 ] && ffmpeg -v error -y -ss "$t" -i "$V" -frames:v 1 "$P/full_t$t.png"; i=$((i + 1)); done
 g=0; j=0; while [ $j -lt ${#B[@]} ]; do g=$((g + 1)); ffmpeg -v error -y -start_number $j -i "$T/b%03d.png" -frames:v 9 -vf "tile=3x3" -frames:v 1 "$P/beats_grid$g.png" 2>/dev/null; j=$((j + 9)); done
 IFS=',' read -ra S <<< "$strips"
-for r in "${S[@]:-}"; do [ -z "$r" ] && continue; a=${r%-*}; b=${r#*-}; len=$(python3 -c "print($b-$a)"); ffmpeg -v error -y -ss "$a" -t "$len" -i "$V" -vf "fps=12/$len,scale=480:-1,tile=4x3:padding=3:color=gray" -frames:v 1 "$P/strip_$a-$b.png"; done
+for r in "${S[@]:-}"; do [ -z "$r" ] && continue; a=${r%-*}; b=${r#*-}; len=$(python3 -c "import sys; print(float(sys.argv[2])-float(sys.argv[1]))" "$a" "$b"); ffmpeg -v error -y -ss "$a" -t "$len" -i "$V" -vf "fps=12/$len,scale=480:-1,tile=4x3:padding=3:color=gray" -frames:v 1 "$P/strip_$a-$b.png"; done
 [ -z "$text" ] && text=$beats; IFS=',' read -ra X <<< "$text"; i=0
 for t in "${X[@]}"; do [ $i -ge 20 ] && break; ffmpeg -v error -y -ss "$t" -i "$V" -frames:v 1 -vf scale=360:-1 "$T/p$(printf %03d $i).png"; i=$((i + 1)); done
 ffmpeg -v error -y -i "$T/p%03d.png" -vf "tile=5x$(( (i + 4) / 5 ))" -frames:v 1 "$P/phone_360px.png" 2>/dev/null

@@ -4,6 +4,8 @@ Hand-painted watercolor and ink, like a picture book that moves. A character act
 
 ## Engine: Claude Animation Base (MIT)
 
+This style runs on someone else's open code. Before the download, tell the person what it is and where it comes from, and get a yes. Use the fixed commit below, not the latest.
+
 ```bash
 git clone https://github.com/JohnHeibel/ClaudeAnimationBase <project-dir>
 cd <project-dir> && git checkout 0ac8bf2b31942376cb6b8c4074715595d512acd2 && npm install   # the commit this style was written against
