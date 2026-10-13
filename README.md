@@ -9,11 +9,11 @@
 
 <p align="center">Type one line in Claude Code. Get a finished short film.</p>
 
-<!-- THE FILM GOES HERE.
-     Edit this file on github.com and drag the film onto this spot. GitHub turns the file into a player.
-     Then put this line under it:
-     <p align="center"><sub>Take One made this film, and the headphone ad inside it. The brand is made up. Sound on.</sub></p>
--->
+https://github.com/user-attachments/assets/f2e005dc-b6b0-4023-b3d7-9bd958643022
+
+<p align="center"><sub>Take One made this film, and the headphone ad inside it. The brand is made up. Sound on.</sub></p>
+
+<!-- The film above is a file uploaded through github.com. To change it, upload the new file the same way and replace the link. -->
 
 ## Install (once)
 
