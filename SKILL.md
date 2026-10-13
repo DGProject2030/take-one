@@ -17,7 +17,7 @@ One line is enough to start. The first reply is short: say in one sentence what 
 
 > Do you want me to run with this to a finished first take, or work in stages with you?
 
-With the question, say what it will cost, so they choose knowing it (see Cost below). If their message already answers it ("just make it", "get to work", or they ask to see each step), do not ask it again: say which way you are going, give the rough size, and ask only for the go on that. The first reply may carry one more question, only if the answer changes what film gets made (which company a name means, what the product actually is). Everything else you would have asked (format, where it posts, who audits the brand) you decide, state in a line and mark as yours.
+With the question, say what it will cost, so they choose knowing it (see Cost below). Add one line about notes: when the first cut is ready they get a review room, a page on their own computer where they click on a frame and leave a note, and each round of notes becomes the next take. People who are not told the room exists never find it. If their message already answers it ("just make it", "get to work", or they ask to see each step), do not ask it again: say which way you are going, give the rough size, and ask only for the go on that. The first reply may carry one more question, only if the answer changes what film gets made (which company a name means, what the product actually is). Everything else you would have asked (format, where it posts, who audits the brand) you decide, state in a line and mark as yours.
 
 - **Run.** Go through to a finished, reviewed film, led by their line and their intent. Decide what a person would have been asked, mark every choice that is yours as yours, and keep inside what they said: no claim, number, link, name or theme they did not give. On a run you stop at exactly these points and nowhere else:
   1. the first reply (the go on the rough size);
@@ -208,7 +208,7 @@ Put the MP4 somewhere obvious (Desktop or Downloads), named plainly (`<name>.mp4
 - **the post copy, written out in the delivery message and saved as `POSTS.md` in the project**: one post for X and one for LinkedIn at least, per `references/captions.md` (the brand's own launch posts when the film is for a brand, the maker's post when it is their own work). This is the social copywriter's job and it is never skipped or deferred: a delivery that says "captions not written yet" is not a delivery. On one run the film went out with a score, a spend report and a review room, and no copy; the person's first note was that the posts were missing
 - an honest one-line note on what was one prompt vs. hand-tweaked
 - the reviewer's score, whose it is, and the known flaws
-- how to give notes, both ways: type them in the chat, or pin them on frames in the review room, open on this cut (`references/review-room.md`): they click on a frame and leave a note there. Notes are the next take: read each one with its snapshot, answer it in a new cut, and send that cut back through the reviewer
+- **the review room, started and opened on this cut** (`references/review-room.md`), with one line on how to give notes both ways: typed in the chat, or pinned on a frame in the room (they click on a frame and leave a note there). This is never skipped or left for the person to ask for: a delivery without the room open is not a delivery. Notes are the next take: read each one with its snapshot, answer it in a new cut, and send that cut back through the reviewer
 
 ## Files
 
